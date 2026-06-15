@@ -193,6 +193,30 @@ app.post('/api/transactions/:branchId', authenticateToken, async (req, res) => {
   }
 });
 
+app.put('/api/transactions/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { employeeId, type, value, notes } = req.body;
+    const result = await pool.query(
+      'UPDATE transactions SET employee_id = $1, type = $2, value = $3, notes = $4 WHERE id = $5 RETURNING id, employee_id AS "employeeId", branch_id AS "branchId", type, value, notes, created_at',
+      [employeeId, type, value, notes, id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/transactions/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM transactions WHERE id = $1', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {

@@ -108,3 +108,22 @@ export const addTransaction = async (branchId, data) => {
   if (!response.ok) throw new Error('فشل تسجيل العملية');
   return await response.json();
 };
+
+export const updateTransaction = async (transactionId, data) => {
+  const response = await fetch(`${API_URL}/transactions/${transactionId}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(data)
+  });
+  if (!response.ok) throw new Error('فشل تعديل العملية');
+  return await response.json();
+};
+
+export const deleteTransaction = async (transactionId) => {
+  const response = await fetch(`${API_URL}/transactions/${transactionId}`, {
+    method: 'DELETE',
+    headers: getHeaders()
+  });
+  if (!response.ok) throw new Error('فشل حذف العملية');
+  return await response.json();
+};

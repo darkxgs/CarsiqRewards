@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Plus, Users, Save } from 'lucide-react';
-import { addEmployee, listenEmployees, addTransaction, listenTransactions } from '../services/db';
+import { Download, Plus, Users, Save, Edit, Trash2 } from 'lucide-react';
+import { addEmployee, listenEmployees, addTransaction, listenTransactions, updateTransaction, deleteTransaction } from '../services/db';
 import { exportToExcel } from '../utils/excelExport';
 
 const BranchDashboard = ({ branchName, branchId, branchType }) => {
@@ -13,6 +13,7 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
   const [newEmpName, setNewEmpName] = useState('');
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [editTransactionId, setEditTransactionId] = useState(null);
 
   const typeOptions = ['خصم', 'مكافأة', 'أخرى'];
 
@@ -66,18 +67,29 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
     }
   };
 
-  const handleAddTransaction = async (e) => {
+  const handleSubmitTransaction = async (e) => {
     e.preventDefault();
     if (!selectedEmp || !value) return;
     setErrorMsg('');
     try {
-      const newTrans = await addTransaction(branchId, {
-        employeeId: selectedEmp,
-        type,
-        value,
-        notes
-      });
-      setTransactions([newTrans, ...transactions]);
+      if (editTransactionId) {
+        const updated = await updateTransaction(editTransactionId, {
+          employeeId: selectedEmp,
+          type,
+          value,
+          notes
+        });
+        setTransactions(transactions.map(t => t.id === editTransactionId ? updated : t));
+        setEditTransactionId(null);
+      } else {
+        const newTrans = await addTransaction(branchId, {
+          employeeId: selectedEmp,
+          type,
+          value,
+          notes
+        });
+        setTransactions([newTrans, ...transactions]);
+      }
       setNotes('');
       setValue(branchType === 'money' ? '1000' : '1:00');
     } catch (error) {
@@ -86,10 +98,35 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
     }
   };
 
+  const handleEditClick = (t) => {
+    setEditTransactionId(t.id);
+    setSelectedEmp(t.employeeId);
+    setType(t.type);
+    setValue(t.value);
+    setNotes(t.notes || '');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteClick = async (tId) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذه العملية؟')) return;
+    try {
+      await deleteTransaction(tId);
+      setTransactions(transactions.filter(t => t.id !== tId));
+    } catch (error) {
+      console.error("Error:", error);
+      setErrorMsg("حدث خطأ أثناء حذف العملية.");
+    }
+  };
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h2>{branchName}</h2>
+      <div className="branch-header">
+        <div className="branch-title">
+          <div className="branch-title-icon">
+            <Users size={32} />
+          </div>
+          {branchName}
+        </div>
         <button 
           className="btn btn-success"
           onClick={() => exportToExcel(branchName, branchType, employees, transactions)}
@@ -134,8 +171,8 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
             </div>
 
             <div className="glass-card">
-              <h2><Save size={24} /> تسجيل عملية</h2>
-              <form onSubmit={handleAddTransaction}>
+              <h2><Save size={24} /> {editTransactionId ? 'تعديل العملية' : 'تسجيل عملية'}</h2>
+              <form onSubmit={handleSubmitTransaction}>
                 <div className="form-group">
                   <label>الموظف</label>
                   <select 
@@ -190,8 +227,22 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
                 </div>
 
                 <button type="submit" className="btn btn-primary w-full" disabled={!selectedEmp}>
-                  <Save size={20} /> حفظ العملية
+                  <Save size={20} /> {editTransactionId ? 'حفظ التعديلات' : 'حفظ العملية'}
                 </button>
+                {editTransactionId && (
+                  <button 
+                    type="button" 
+                    className="btn" 
+                    style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', width: '100%', marginTop: '0.5rem' }} 
+                    onClick={() => {
+                      setEditTransactionId(null);
+                      setNotes('');
+                      setValue(branchType === 'money' ? '1000' : '1:00');
+                    }}
+                  >
+                    إلغاء التعديل
+                  </button>
+                )}
               </form>
             </div>
           </div>
@@ -206,6 +257,7 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
                   <th>القيمة</th>
                   <th>الملاحظات</th>
                   <th>التاريخ</th>
+                  <th>إجراءات</th>
                 </tr>
               </thead>
               <tbody>
@@ -233,6 +285,22 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
                             year: 'numeric', month: 'short', day: 'numeric',
                             hour: '2-digit', minute:'2-digit'
                           })}
+                        </td>
+                        <td style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                          <button 
+                            className="btn" 
+                            style={{ padding: '0.5rem', background: 'rgba(255,255,255,0.1)' }}
+                            onClick={() => handleEditClick(t)}
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button 
+                            className="btn" 
+                            style={{ padding: '0.5rem', background: 'rgba(244,63,94,0.1)', color: '#fb7185' }}
+                            onClick={() => handleDeleteClick(t.id)}
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </td>
                       </tr>
                     );
