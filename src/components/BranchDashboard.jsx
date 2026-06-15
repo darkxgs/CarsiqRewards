@@ -15,8 +15,19 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
   const [errorMsg, setErrorMsg] = useState('');
   const [editTransactionId, setEditTransactionId] = useState(null);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
+  const [isValueCustom, setIsValueCustom] = useState(false);
 
   const typeOptions = ['خصم', 'مكافأة', 'أخرى'];
+
+  const hoursOptions = ['1:00', '2:00', '3:00', '4:00', '5:00'];
+  const moneyOptions = ['2500', '5000', '10000'];
+  const mixedOptions = ['1:00', '2:00', '3:00', '4:00', '5:00', '2500', '5000'];
+
+  const getPredefinedValues = () => {
+    if (branchType === 'hours') return hoursOptions;
+    if (branchType === 'money') return moneyOptions;
+    return mixedOptions;
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -92,7 +103,8 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
         setTransactions([newTrans, ...transactions]);
       }
       setNotes('');
-      setValue(branchType === 'money' ? '1000' : '1:00');
+      setIsValueCustom(false);
+      setValue(getPredefinedValues()[0]);
     } catch (error) {
       console.error("Error:", error);
       setErrorMsg("حدث خطأ أثناء حفظ العملية.");
@@ -103,7 +115,17 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
     setEditTransactionId(t.id);
     setSelectedEmp(t.employeeId);
     setType(t.type);
-    setValue(t.value);
+    
+    // Check if the value is in our predefined list
+    const predefined = getPredefinedValues();
+    if (predefined.includes(t.value)) {
+      setIsValueCustom(false);
+      setValue(t.value);
+    } else {
+      setIsValueCustom(true);
+      setValue(t.value);
+    }
+    
     setNotes(t.notes || '');
     // Scroll the main content container to top
     const formSection = document.getElementById('form-section');
@@ -131,12 +153,12 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
 
   return (
     <div>
-      <div className="branch-header">
+      <div className="branch-header" style={{ marginBottom: '1.5rem' }}>
         <div className="branch-title">
           <div className="branch-title-icon">
             <Users size={32} />
           </div>
-          {branchName}
+          نظام الخصومات والمكافآت - {branchName}
         </div>
         <button 
           className="btn btn-success"
@@ -145,6 +167,12 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
         >
           <Download size={20} /> تصدير إكسل
         </button>
+      </div>
+
+      <div style={{ color: 'var(--text-muted)', marginBottom: '2rem', padding: '0 1rem', fontSize: '1.1rem' }}>
+        {branchType === 'hours' 
+          ? 'يرجى تحديد اسم الموظف ونوع الإضافة سواء كان خصم أو مكافأة وبنظام الساعات فقط' 
+          : 'يرجى تحديد اسم الموظف ونوع الإضافة سواء كان خصم أو مكافأة وبنظام الساعات ونصف يوم أو ربع يوم لكادر النسب'}
       </div>
 
       {errorMsg && (
@@ -215,14 +243,40 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
 
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label>القيمة ({branchType === 'hours' ? 'ساعات' : branchType === 'money' ? 'مبالغ' : 'ساعات/مبالغ'})</label>
-                    <input 
-                      type="text" 
-                      className="form-control"
-                      value={value}
-                      onChange={e => setValue(e.target.value)}
-                      placeholder={branchType === 'hours' ? '1:00' : '5000'}
-                      required
-                    />
+                    {!isValueCustom ? (
+                      <select 
+                        className="form-control"
+                        value={value}
+                        onChange={e => {
+                          if (e.target.value === 'custom') {
+                            setIsValueCustom(true);
+                            setValue('');
+                          } else {
+                            setValue(e.target.value);
+                          }
+                        }}
+                      >
+                        {getPredefinedValues().map(v => (
+                          <option key={v} value={v}>{v}</option>
+                        ))}
+                        <option value="custom">أخرى (إدخال يدوي)...</option>
+                      </select>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input 
+                          type="text" 
+                          className="form-control"
+                          value={value}
+                          onChange={e => setValue(e.target.value)}
+                          placeholder="أدخل القيمة"
+                          required
+                        />
+                        <button type="button" className="btn btn-secondary" style={{ padding: '0 0.75rem' }} onClick={() => {
+                          setIsValueCustom(false);
+                          setValue(getPredefinedValues()[0]);
+                        }}>×</button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="form-group" style={{ marginBottom: 0 }}>
@@ -248,7 +302,8 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
                         onClick={() => {
                           setEditTransactionId(null);
                           setNotes('');
-                          setValue(branchType === 'money' ? '1000' : '1:00');
+                          setIsValueCustom(false);
+                          setValue(getPredefinedValues()[0]);
                         }}
                       >
                         إلغاء
