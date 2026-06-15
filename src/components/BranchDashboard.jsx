@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Plus, Users, Save } from 'lucide-react';
-import { addEmployee, getEmployees, addTransaction, getTransactions } from '../services/db';
+import { addEmployee, listenEmployees, addTransaction, listenTransactions } from '../services/db';
 import { exportToExcel } from '../utils/excelExport';
 
 const BranchDashboard = ({ branchName, branchId }) => {
@@ -24,25 +24,38 @@ const BranchDashboard = ({ branchName, branchId }) => {
   const typeOptions = branchId === 'industrial' ? ['خصم', 'مكافأة', 'Other'] : ['خصم', 'مكافأة'];
 
   useEffect(() => {
-    loadData();
-  }, [branchId]);
-
-  const loadData = async () => {
     setLoading(true);
     setErrorMsg('');
-    try {
-      const emps = await getEmployees(branchId);
-      const trans = await getTransactions(branchId);
-      setEmployees(emps);
-      setTransactions(trans);
-      if (emps.length > 0) setSelectedEmp(emps[0].id);
-    } catch (error) {
-      console.error("Firebase Error:", error);
-      setErrorMsg("لم نتمكن من الاتصال بقاعدة البيانات. يرجى التأكد من تفعيل (Firestore Database) في حسابك على Firebase، وتعديل الـ Rules لتسمح بالقراءة والكتابة (allow read, write: if true;).");
-    } finally {
+    
+    // Set a timeout to stop loading if it takes too long
+    const timeoutId = setTimeout(() => {
       setLoading(false);
-    }
-  };
+    }, 3000);
+
+    const handleFirebaseError = (error) => {
+      console.error("Firebase Error:", error);
+      setErrorMsg("لم نتمكن من الاتصال بقاعدة البيانات. يرجى التأكد من تفعيل (Firestore Database) وتعديل الـ Rules.");
+      setLoading(false);
+      clearTimeout(timeoutId);
+    };
+
+    const unsubEmployees = listenEmployees(branchId, (emps) => {
+      setEmployees(emps);
+      if (emps.length > 0 && !selectedEmp) setSelectedEmp(emps[0].id);
+      setLoading(false);
+      clearTimeout(timeoutId);
+    }, handleFirebaseError);
+
+    const unsubTransactions = listenTransactions(branchId, (trans) => {
+      setTransactions(trans);
+    }, handleFirebaseError);
+
+    return () => {
+      unsubEmployees();
+      unsubTransactions();
+      clearTimeout(timeoutId);
+    };
+  }, [branchId]);
 
   const handleAddEmployee = async (e) => {
     e.preventDefault();
