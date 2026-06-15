@@ -160,7 +160,7 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
       ) : (
         <div className="dashboard-grid" id="form-section">
           {/* Sidebar Forms */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="forms-container">
             <div className="glass-card">
               <h2><Users size={24} /> إضافة موظف جديد</h2>
               <form onSubmit={handleAddEmployee}>
