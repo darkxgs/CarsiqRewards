@@ -549,42 +549,29 @@ tr:hover td {
 }
 
 @media (max-width: 1024px) {
-  .app-container {
-    flex-direction: column;
+  .sidebar {
+    width: 260px;
+    padding: 2rem 1rem;
+  }
+  .sidebar-logo h1 {
+    font-size: 1.4rem;
+  }
+  .sidebar-logo img {
+    width: 60px;
+    height: 60px;
   }
   .forms-container {
     grid-template-columns: 1fr; /* Stack forms on iPad/tablets */
   }
-  .sidebar {
-    width: 100%;
-    border-left: none;
-    border-bottom: 1px solid var(--card-border);
-    padding: 1rem;
-    flex-direction: row;
-    overflow-x: auto;
-    align-items: center;
-    gap: 1.5rem;
-  }
-  .sidebar-logo {
-    flex-direction: row;
-    margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: none;
-    border-left: 1px solid var(--card-border);
-    padding-left: 1rem;
-  }
-  .sidebar-logo h1 {
-    font-size: 1.2rem;
-  }
-  .sidebar-logo img {
-    width: 40px;
-    height: 40px;
-  }
 }
 
 @media (max-width: 768px) {
+  body {
+    /* Allow zooming out and horizontal scrolling if content is wider */
+    min-width: 800px;
+  }
   .form-row-grid {
-    grid-template-columns: 1fr; /* Stack inputs inside form on mobile */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 0.75rem;
   }
 
@@ -593,7 +580,7 @@ tr:hover td {
   }
   
   .glass-card {
-    padding: 1rem;
+    padding: 1.25rem;
   }
 
   .branch-header {
@@ -601,28 +588,16 @@ tr:hover td {
   }
   
   .branch-title {
-    font-size: 1.2rem;
-  }
-
-  .branch-title-icon {
-    padding: 0.5rem;
+    font-size: 1.3rem;
   }
 
   .nav-link {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.95rem;
-  }
-
-  .login-card {
-    padding: 2rem 1.25rem;
-  }
-  
-  .login-title {
-    font-size: 1.4rem;
+    padding: 0.75rem 1rem;
+    font-size: 1.05rem;
   }
 
   th, td {
     padding: 0.75rem;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 }
