@@ -532,7 +532,7 @@ tr:hover td {
 /* Mobile Responsiveness */
 @media (max-width: 1200px) {
   .forms-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: 300px 1fr; /* Keep side-by-side on large tablets */
   }
   .main-content {
     padding: 1.5rem;
@@ -552,6 +552,9 @@ tr:hover td {
   .app-container {
     flex-direction: column;
   }
+  .forms-container {
+    grid-template-columns: 1fr; /* Stack forms on iPad/tablets */
+  }
   .sidebar {
     width: 100%;
     border-left: none;
@@ -560,6 +563,7 @@ tr:hover td {
     flex-direction: row;
     overflow-x: auto;
     align-items: center;
+    gap: 1.5rem;
   }
   .sidebar-logo {
     flex-direction: row;
@@ -579,8 +583,9 @@ tr:hover td {
 }
 
 @media (max-width: 768px) {
-  .forms-container {
-    grid-template-columns: 1fr; /* Stack forms on very small phones */
+  .form-row-grid {
+    grid-template-columns: 1fr; /* Stack inputs inside form on mobile */
+    gap: 0.75rem;
   }
 
   .main-content {
