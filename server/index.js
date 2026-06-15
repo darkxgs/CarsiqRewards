@@ -20,11 +20,7 @@ const pool = new Pool({
 
 const initDB = async () => {
   try {
-    // Drop old tables to recreate with new schema (since user approved reset)
-    await pool.query(`DROP TABLE IF EXISTS transactions CASCADE;`);
-    await pool.query(`DROP TABLE IF EXISTS employees CASCADE;`);
-    await pool.query(`DROP TABLE IF EXISTS branches CASCADE;`);
-    await pool.query(`DROP TABLE IF EXISTS users CASCADE;`);
+    // Tables will be created if they don't exist
 
     await pool.query(`
       CREATE TABLE users (
@@ -59,10 +55,10 @@ const initDB = async () => {
     `);
 
     // Create default admin user if not exists
-    const adminCheck = await pool.query('SELECT * FROM users WHERE username = $1', ['admin']);
+    const adminCheck = await pool.query('SELECT * FROM users WHERE username = $1', ['abbas']);
     if (adminCheck.rows.length === 0) {
-      const hashedPw = await bcrypt.hash('admin123', 10);
-      await pool.query('INSERT INTO users (username, password_hash) VALUES ($1, $2)', ['admin', hashedPw]);
+      const hashedPw = await bcrypt.hash('abbas123', 10);
+      await pool.query('INSERT INTO users (username, password_hash) VALUES ($1, $2)', ['abbas', hashedPw]);
     }
 
     // Create default branches
