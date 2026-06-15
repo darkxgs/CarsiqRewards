@@ -181,16 +181,23 @@ body::before {
 
 /* Dashboard Layout */
 .dashboard-grid {
-  display: grid;
-  grid-template-columns: 350px 1fr;
-  gap: 1.5rem;
-  align-items: start;
-}
-
-.forms-container {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.forms-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.form-row-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  align-items: end;
 }
 
 /* Premium Glass Cards */
@@ -524,13 +531,8 @@ tr:hover td {
 
 /* Mobile Responsiveness */
 @media (max-width: 1200px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
   .forms-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    grid-template-columns: 1fr;
   }
   .main-content {
     padding: 1.5rem;

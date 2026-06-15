@@ -184,76 +184,78 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
             <div className="glass-card">
               <h2><Save size={24} /> {editTransactionId ? 'تعديل العملية' : 'تسجيل عملية'}</h2>
               <form onSubmit={handleSubmitTransaction}>
-                <div className="form-group">
-                  <label>الموظف</label>
-                  <select 
-                    className="form-control" 
-                    value={selectedEmp}
-                    onChange={e => setSelectedEmp(e.target.value)}
-                    required
-                  >
-                    <option value="" disabled>اختر الموظف</option>
-                    {employees.map(emp => (
-                      <option key={emp.id} value={emp.id}>{emp.name}</option>
-                    ))}
-                  </select>
-                </div>
+                <div className="form-row-grid">
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>الموظف</label>
+                    <select 
+                      className="form-control" 
+                      value={selectedEmp}
+                      onChange={e => setSelectedEmp(e.target.value)}
+                      required
+                    >
+                      <option value="" disabled>اختر الموظف</option>
+                      {employees.map(emp => (
+                        <option key={emp.id} value={emp.id}>{emp.name}</option>
+                      ))}
+                    </select>
+                  </div>
 
-                <div className="form-group">
-                  <label>نوع العملية</label>
-                  <select 
-                    className="form-control"
-                    value={type}
-                    onChange={e => setType(e.target.value)}
-                  >
-                    {typeOptions.map(opt => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>نوع العملية</label>
+                    <select 
+                      className="form-control"
+                      value={type}
+                      onChange={e => setType(e.target.value)}
+                    >
+                      {typeOptions.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
 
-                <div className="form-group">
-                  <label>القيمة ({branchType === 'hours' ? 'ساعات' : branchType === 'money' ? 'مبالغ نقدية' : 'ساعات أو مبالغ'})</label>
-                  <input 
-                    type="text" 
-                    className="form-control"
-                    value={value}
-                    onChange={e => setValue(e.target.value)}
-                    placeholder={branchType === 'hours' ? 'مثال: 1:00' : 'مثال: 5000'}
-                    required
-                  />
-                  <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
-                    أدخل القيمة يدوياً لتكون أكثر مرونة (مثال: 1:30 أو 2500)
-                  </small>
-                </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>القيمة ({branchType === 'hours' ? 'ساعات' : branchType === 'money' ? 'مبالغ' : 'ساعات/مبالغ'})</label>
+                    <input 
+                      type="text" 
+                      className="form-control"
+                      value={value}
+                      onChange={e => setValue(e.target.value)}
+                      placeholder={branchType === 'hours' ? '1:00' : '5000'}
+                      required
+                    />
+                  </div>
 
-                <div className="form-group">
-                  <label>ملاحظات (اختياري)</label>
-                  <textarea 
-                    className="form-control"
-                    value={notes}
-                    onChange={e => setNotes(e.target.value)}
-                    rows="2"
-                  ></textarea>
-                </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>ملاحظات</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      value={notes}
+                      onChange={e => setNotes(e.target.value)}
+                      placeholder="اختياري"
+                    />
+                  </div>
 
-                <button type="submit" className="btn btn-primary w-full" disabled={!selectedEmp}>
-                  <Save size={20} /> {editTransactionId ? 'حفظ التعديلات' : 'حفظ العملية'}
-                </button>
-                {editTransactionId && (
-                  <button 
-                    type="button" 
-                    className="btn" 
-                    style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', width: '100%', marginTop: '0.5rem' }} 
-                    onClick={() => {
-                      setEditTransactionId(null);
-                      setNotes('');
-                      setValue(branchType === 'money' ? '1000' : '1:00');
-                    }}
-                  >
-                    إلغاء التعديل
-                  </button>
-                )}
+                  <div className="form-group" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <button type="submit" className="btn btn-primary w-full" disabled={!selectedEmp}>
+                      <Save size={20} /> {editTransactionId ? 'حفظ التعديل' : 'حفظ'}
+                    </button>
+                    {editTransactionId && (
+                      <button 
+                        type="button" 
+                        className="btn" 
+                        style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', width: '100%' }} 
+                        onClick={() => {
+                          setEditTransactionId(null);
+                          setNotes('');
+                          setValue(branchType === 'money' ? '1000' : '1:00');
+                        }}
+                      >
+                        إلغاء
+                      </button>
+                    )}
+                  </div>
+                </div>
               </form>
             </div>
           </div>
