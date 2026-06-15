@@ -1,12 +1,55 @@
 const API_URL = 'http://localhost:3001/api';
 
-export const listenEmployees = (branch, callback, onError) => {
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
+export const loginUser = async (username, password) => {
+  const response = await fetch(`${API_URL}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'فشل تسجيل الدخول');
+  }
+  const data = await response.json();
+  localStorage.setItem('token', data.token);
+  return data;
+};
+
+export const logoutUser = () => {
+  localStorage.removeItem('token');
+};
+
+export const fetchBranches = async () => {
+  const response = await fetch(`${API_URL}/branches`, { headers: getHeaders() });
+  if (!response.ok) throw new Error('فشل جلب الفروع');
+  return await response.json();
+};
+
+export const addBranch = async (name, type) => {
+  const response = await fetch(`${API_URL}/branches`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ name, type })
+  });
+  if (!response.ok) throw new Error('فشل إضافة الفرع');
+  return await response.json();
+};
+
+export const listenEmployees = (branchId, callback, onError) => {
   let isCancelled = false;
   
-  const fetchEmployees = async () => {
+  const fetchEmps = async () => {
     try {
-      const response = await fetch(`${API_URL}/employees/${branch}`);
-      if (!response.ok) throw new Error('Network response was not ok');
+      const response = await fetch(`${API_URL}/employees/${branchId}`, { headers: getHeaders() });
+      if (!response.ok) throw new Error('فشل جلب الموظفين');
       const data = await response.json();
       if (!isCancelled) callback(data);
     } catch (error) {
@@ -14,10 +57,8 @@ export const listenEmployees = (branch, callback, onError) => {
     }
   };
 
-  fetchEmployees();
-  
-  // Minimal polling just to keep the dashboard feel
-  const intervalId = setInterval(fetchEmployees, 10000);
+  fetchEmps();
+  const intervalId = setInterval(fetchEmps, 10000);
 
   return () => {
     isCancelled = true;
@@ -25,13 +66,13 @@ export const listenEmployees = (branch, callback, onError) => {
   };
 };
 
-export const listenTransactions = (branch, callback, onError) => {
+export const listenTransactions = (branchId, callback, onError) => {
   let isCancelled = false;
   
-  const fetchTransactions = async () => {
+  const fetchTrans = async () => {
     try {
-      const response = await fetch(`${API_URL}/transactions/${branch}`);
-      if (!response.ok) throw new Error('Network response was not ok');
+      const response = await fetch(`${API_URL}/transactions/${branchId}`, { headers: getHeaders() });
+      if (!response.ok) throw new Error('فشل جلب العمليات');
       const data = await response.json();
       if (!isCancelled) callback(data);
     } catch (error) {
@@ -39,9 +80,8 @@ export const listenTransactions = (branch, callback, onError) => {
     }
   };
 
-  fetchTransactions();
-  
-  const intervalId = setInterval(fetchTransactions, 10000);
+  fetchTrans();
+  const intervalId = setInterval(fetchTrans, 10000);
 
   return () => {
     isCancelled = true;
@@ -49,32 +89,22 @@ export const listenTransactions = (branch, callback, onError) => {
   };
 };
 
-export const addEmployee = async (branch, name) => {
-  try {
-    const response = await fetch(`${API_URL}/employees/${branch}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
-    });
-    if (!response.ok) throw new Error('Failed to add employee');
-    return await response.json();
-  } catch (e) {
-    console.error("Error adding employee: ", e);
-    throw e;
-  }
+export const addEmployee = async (branchId, name) => {
+  const response = await fetch(`${API_URL}/employees/${branchId}`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ name })
+  });
+  if (!response.ok) throw new Error('فشل إضافة الموظف');
+  return await response.json();
 };
 
-export const addTransaction = async (branch, data) => {
-  try {
-    const response = await fetch(`${API_URL}/transactions/${branch}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    if (!response.ok) throw new Error('Failed to add transaction');
-    return await response.json();
-  } catch (e) {
-    console.error("Error adding transaction: ", e);
-    throw e;
-  }
+export const addTransaction = async (branchId, data) => {
+  const response = await fetch(`${API_URL}/transactions/${branchId}`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data)
+  });
+  if (!response.ok) throw new Error('فشل تسجيل العملية');
+  return await response.json();
 };
