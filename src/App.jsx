@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import BranchDashboard from './components/BranchDashboard';
 import Login from './components/Login';
 import { fetchBranches, addBranch, logoutUser } from './services/db';
-import { LogOut, Plus, MapPin } from 'lucide-react';
+import { LogOut, Plus, MapPin, Menu, X } from 'lucide-react';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
@@ -11,6 +11,7 @@ function App() {
   const [showAddBranch, setShowAddBranch] = useState(false);
   const [newBranchName, setNewBranchName] = useState('');
   const [newBranchType, setNewBranchType] = useState('mixed');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -61,8 +62,29 @@ function App() {
 
   return (
     <div className="app-container">
-      <aside className="sidebar">
-        <div className="sidebar-logo">
+      {/* Mobile Header for Hamburger */}
+      <div className="mobile-header">
+        <div className="sidebar-logo mobile-logo">
+          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px' }} />
+          <h1 style={{ fontSize: '1.2rem', marginBottom: 0 }}>هندسة السيارات</h1>
+        </div>
+        <button className="btn btn-icon" onClick={() => setIsSidebarOpen(true)}>
+          <Menu size={28} />
+        </button>
+      </div>
+
+      {/* Overlay for mobile sidebar */}
+      {isSidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)}></div>
+      )}
+
+      <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header-mobile">
+          <button className="btn btn-icon close-btn" onClick={() => setIsSidebarOpen(false)}>
+            <X size={28} />
+          </button>
+        </div>
+        <div className="sidebar-logo desktop-logo">
           <img src="/logo.png" alt="Logo" />
           <h1>هندسة السيارات</h1>
         </div>
@@ -72,7 +94,10 @@ function App() {
             <button
               key={branch.id}
               className={`nav-link ${activeBranch?.id === branch.id ? 'active' : ''}`}
-              onClick={() => setActiveBranch(branch)}
+              onClick={() => {
+                setActiveBranch(branch);
+                setIsSidebarOpen(false); // Close on mobile after selection
+              }}
             >
               <MapPin size={20} />
               {branch.name}
