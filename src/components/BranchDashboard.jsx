@@ -104,7 +104,11 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
     setType(t.type);
     setValue(t.value);
     setNotes(t.notes || '');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll the main content container to top
+    const formSection = document.getElementById('form-section');
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   const handleDeleteClick = async (tId) => {
@@ -147,7 +151,7 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
           جاري التحميل...
         </div>
       ) : (
-        <div className="dashboard-grid">
+        <div className="dashboard-grid" id="form-section">
           {/* Sidebar Forms */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="glass-card">
