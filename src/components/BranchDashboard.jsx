@@ -224,8 +224,8 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
                             {t.type}
                           </span>
                         </td>
-                        <td style={{ fontWeight: 'bold' }}>
-                          {t.value} {t.value.includes(':') ? 'ساعة' : 'ج.م'}
+                        <td style={{ fontWeight: 'bold', color: '#e2e8f0' }}>
+                          {t.value} {t.value.includes(':') ? 'ساعة' : 'د.ع'}
                         </td>
                         <td>{t.notes || '-'}</td>
                         <td style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>

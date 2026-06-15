@@ -23,27 +23,27 @@ const initDB = async () => {
     // Tables will be created if they don't exist
 
     await pool.query(`
-      CREATE TABLE users (
+      CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(50) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL
       );
 
-      CREATE TABLE branches (
+      CREATE TABLE IF NOT EXISTS branches (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         type VARCHAR(50) DEFAULT 'mixed',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
-      CREATE TABLE employees (
+      CREATE TABLE IF NOT EXISTS employees (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
       
-      CREATE TABLE transactions (
+      CREATE TABLE IF NOT EXISTS transactions (
         id SERIAL PRIMARY KEY,
         employee_id INTEGER REFERENCES employees(id) ON DELETE CASCADE,
         branch_id INTEGER REFERENCES branches(id) ON DELETE CASCADE,
@@ -54,7 +54,10 @@ const initDB = async () => {
       );
     `);
 
-    // Create default admin user if not exists
+    // Delete old admin user if it exists
+    await pool.query('DELETE FROM users WHERE username = $1', ['admin']);
+
+    // Create default abbas user if not exists
     const adminCheck = await pool.query('SELECT * FROM users WHERE username = $1', ['abbas']);
     if (adminCheck.rows.length === 0) {
       const hashedPw = await bcrypt.hash('abbas123', 10);
@@ -191,6 +194,10 @@ app.post('/api/transactions/:branchId', authenticateToken, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+export default app;
