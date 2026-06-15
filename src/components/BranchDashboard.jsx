@@ -14,6 +14,7 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [editTransactionId, setEditTransactionId] = useState(null);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
 
   const typeOptions = ['خصم', 'مكافأة', 'أخرى'];
 
@@ -111,14 +112,20 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
     }
   };
 
-  const handleDeleteClick = async (tId) => {
-    if (!window.confirm('هل أنت متأكد من حذف هذه العملية؟')) return;
+  const handleDeleteClick = (tId) => {
+    setTransactionToDelete(tId);
+  };
+
+  const confirmDelete = async () => {
+    if (!transactionToDelete) return;
     try {
-      await deleteTransaction(tId);
-      setTransactions(transactions.filter(t => t.id !== tId));
+      await deleteTransaction(transactionToDelete);
+      setTransactions(transactions.filter(t => t.id !== transactionToDelete));
+      setTransactionToDelete(null);
     } catch (error) {
       console.error("Error:", error);
       setErrorMsg("حدث خطأ أثناء حذف العملية.");
+      setTransactionToDelete(null);
     }
   };
 
@@ -312,6 +319,30 @@ const BranchDashboard = ({ branchName, branchId, branchType }) => {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {transactionToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>تأكيد الحذف</h3>
+            <p>هل أنت متأكد من حذف هذه العملية؟ لا يمكن التراجع عن هذا الإجراء.</p>
+            <div className="modal-actions">
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => setTransactionToDelete(null)}
+              >
+                إلغاء
+              </button>
+              <button 
+                className="btn btn-danger" 
+                onClick={confirmDelete}
+              >
+                نعم، احذف
+              </button>
+            </div>
           </div>
         </div>
       )}
